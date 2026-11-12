@@ -1,0 +1,9 @@
+{
+    "message": "Email sent successfully",
+    "correlationId": "a1b2c3",
+    "emailInfo": {
+        "subject": "Inventory Sync Reconciliation Report - 12/11/2026",
+        "to": "muralidharanmaheswaran10@gmail.com",
+        "cc": "muralidharanmtnj@gmail.com"
+    }
+}

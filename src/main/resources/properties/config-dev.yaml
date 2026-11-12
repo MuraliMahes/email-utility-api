@@ -1,11 +1,30 @@
 # Email Configuration
-
 email:
   host: "smtp.gmail.com"
   port: "587"
   user: "muralidharanmaheswaran10@gmail.com"
+  transactionType: "SEND_EMAIL"
+  connectionTimeout: "10"
+  readTimeout: "10"
+  writeTimeout: "10"
+  reconnection:
+    frequency: "5000"
+    attempts: "2"
+  
   
 # API Autodiscovery
-
 api:
   id: "21290686"
+  name: "email-utility-api"
+  
+    
+# HTTP Configuration
+https:
+  host: "0.0.0.0"
+  port: "8081"
+  readTimeout: "30000"
+  connectionIdleTimeout: "40000"
+  reconnection:
+    frequency: "5000"
+    attempts: "2"
+  

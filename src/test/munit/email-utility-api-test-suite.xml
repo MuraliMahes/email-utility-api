@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="email-utility-api-test-suite.xml" />
+	<munit:test name="email-utility-api-sucess-test" doc:id="58e84c3c-259a-446d-b185-ef99ab1e2811" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Email Send" doc:id="1088a023-1ab2-494d-9054-50d372a8365f" processor="email:send">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Send Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="5399553a-35e9-4b96-b0a1-4a4e5134f4a7" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Email_SMTP" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event Payload" doc:id="d16b8768-9c96-4c8e-8aaa-5a05d05a76c2" >
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://munits/email-request-payload.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="post:\email:application\json:email-utility-api-config" doc:id="7a0c201a-e993-4fee-8d07-41affa4c6373" name="post:\email:application\json:email-utility-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call to end of the flow" doc:id="ae9f206b-d615-46f1-8d7a-7050366e6f15" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="End" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="f2d5249e-b665-43e3-bb2f-5dc8d82a71d7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-equals doc:name="Assert final response" doc:id="72029c21-5d4e-469b-bd09-48334c2338ee" actual="#[payload]" expected="#[output application/json&#10;---&#10;readUrl('classpath://munits/email-response-payload.json','application/json')]" message="Assertion failed"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="send-email-error-test" doc:id="557ab962-c902-4bd2-85e7-dcd7266f7878" expectedErrorType="EMAIL:CONNECTIVITY" timeOut="180000">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Email Send with Error" doc:id="91cf8ee9-c739-40f1-8753-2c7cfb3d43b4" processor="email:send" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Send Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="5399553a-35e9-4b96-b0a1-4a4e5134f4a7" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Email_SMTP" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="EMAIL:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event Payload" doc:id="b13c1109-3b81-4209-a3cb-55e06f1302b7" >
+				<munit:payload value="#[output application/json&#10;---&#10;readUrl('classpath://munits/email-request-payload.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="post:\email:application\json:email-utility-api-config" doc:id="147de6cb-aa77-4783-8126-dccd8a357fd1" name="post:\email:application\json:email-utility-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call to Global Error Handler" doc:id="3b40aacd-4921-47f6-ad06-5eb697ef8a9b" processor="ee:transform" times="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Set Response payload" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="210be051-4879-46eb-a88e-2af180f7ae7a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

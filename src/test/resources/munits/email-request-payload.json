@@ -1,0 +1,20 @@
+{
+  "subject": "Inventory Sync Reconciliation Report - 12/11/2026",
+  "to": "muralidharanmaheswaran10@gmail.com",
+  "cc": "muralidharanmtnj@gmail.com",
+  "body": {
+    "environment": "DEV",
+    "title": "Inventory Sync Reconciliation Report",
+    "message": "The inventory file was processed. Details below. Error records are identified and the error records are moved to a csv file in error folder. Please find the error file name below.",
+    "runDate": "2026-11-11",
+    "inputFileName": "inventory_full_12-11-2026.csv",
+    "correlationId": "a1b2c3",
+    "startTime": "04:00:02",
+    "endTime": "04:21:40",
+    "totalRecords": 12500000,
+    "validRecords": 12499400,
+    "errorRecords": 600,
+    "errorFile": "inventory_errors_12-11-2026.csv",
+    "appName": "inventory-sync-batch-papp"
+  }
+}

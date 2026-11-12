@@ -13,7 +13,7 @@
         <apikit:router config-ref="email-utility-api-config" />
 		<error-handler ref="global-error-handler" />
     </flow>
-    <flow name="post:\email:application\json:email-utility-api-config">
+    <flow name="post:\email:application\json:email-utility-api-config" doc:id="5147f466-13e1-4856-af3c-380dee69ee8c">
         <flow-ref doc:name="send-email-subflow" doc:id="0db31376-d856-4953-a8b2-4f668885c8a0" name="send-email-subflow"/>
 		<error-handler ref="global-error-handler" />
     </flow>
