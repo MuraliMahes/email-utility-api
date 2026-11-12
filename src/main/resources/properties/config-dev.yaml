@@ -1,0 +1,11 @@
+# Email Configuration
+
+email:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: "muralidharanmaheswaran10@gmail.com"
+  
+# API Autodiscovery
+
+api:
+  id: "21290686"

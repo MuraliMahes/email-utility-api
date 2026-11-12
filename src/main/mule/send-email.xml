@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="send-email-subflow" doc:id="ba1c0031-14b3-4512-b607-3f41c29d6ccf" >
+		<logger level="INFO" doc:name="Start" doc:id="42d3ca8a-2097-4a0e-adf0-4719820a7f6c" message="----- FLOW STARTED -----"/>
+		<ee:transform doc:name="Set Email headers &amp; body" doc:id="e1ea496d-8a73-41ee-9d23-b8be00c759d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.body]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="emailHeaders" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"subject": payload.subject,
+	"to": payload.to splitBy ",",
+	"cc": payload.cc splitBy ","
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<email:send doc:name="Send Email" doc:id="5399553a-35e9-4b96-b0a1-4a4e5134f4a7" toAddresses="#[vars.emailHeaders.to]" config-ref="Email_SMTP" fromAddress="${email.user}" ccAddresses='#[vars.emailHeaders.cc default null]' subject="#[vars.emailHeaders.subject]">
+			<email:body contentType="text/plain" encoding="UTF-8" />
+		</email:send>
+		<ee:transform doc:name="Set Response payload" doc:id="4692c3c3-6e44-4d3c-9b8c-bfec6c7ab118" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Email sent successfully",
+	"correlationId": vars.correlationId,
+	"emailInfo": {
+		"subject": vars.emailHeaders.subject,
+		"to": vars.emailHeaders.to,
+		"cc": vars.emailHeaders.cc
+	}
+	
+}
+  ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End" doc:id="f2d5249e-b665-43e3-bb2f-5dc8d82a71d7" message="----- EMAIL SENT -----"/>
+	</sub-flow>
+</mule>
