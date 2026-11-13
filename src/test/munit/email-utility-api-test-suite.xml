@@ -17,6 +17,13 @@
 					<munit-tools:with-attribute whereValue="Email_SMTP" attributeName="config-ref" />
 				</munit-tools:with-attributes>
 			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock AMQP Ack" doc:id="4f2ea72a-b446-4d2a-8ffb-a5c9aacc25eb" processor="amqp:ack">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack the MQ" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="17ac1d1f-912a-4891-a0fb-53c1973cfc80" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="#[vars.ackId]" attributeName="ackId" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
 		</munit:behavior>
 		<munit:execution >
 			<munit:set-event doc:name="Set Event Payload" doc:id="d16b8768-9c96-4c8e-8aaa-5a05d05a76c2" >
@@ -44,6 +51,13 @@
 				<munit-tools:then-return >
 					<munit-tools:error typeId="EMAIL:CONNECTIVITY" />
 				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock AMQP Reject" doc:id="7a463c82-1db8-4be8-989e-59bb72028e10" processor="amqp:reject">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Reject the message" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="de621f10-3924-4b4f-ac89-cf0ebf5f9919" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="#[vars.ackId]" attributeName="ackId" />
+				</munit-tools:with-attributes>
 			</munit-tools:mock-when>
 		</munit:behavior>
 		<munit:execution >
