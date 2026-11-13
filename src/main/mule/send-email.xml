@@ -44,6 +44,7 @@ attributes.ackId]]></ee:set-variable>
 			<logger level="INFO" doc:name="End" doc:id="4f58686f-47a2-4b38-827c-07701c821cac" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name,flow.name,&quot;END&quot;,vars.correlationId, {&quot;subject&quot;: vars.emailHeaders.subject}, Mule::p('email.transactionType'), &quot;Email sent &amp; the flow completed&quot;)]" />
 			<error-handler >
 				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="974866a1-fd8d-4053-9c1f-b7e7fbed0cbe" type="VALIDATION:BLANK_STRING, VALIDATION:INVALID_EMAIL" >
+					<amqp:ack doc:name="Ack" doc:id="fdf4864e-4be3-4783-9047-7abccb12a934" ackId="#[vars.ackId]"/>
 				</on-error-propagate>
 				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4f27eb92-d368-46f8-9885-91071ee3913e" >
 					<amqp:reject doc:name="Reject the message" doc:id="de621f10-3924-4b4f-ac89-cf0ebf5f9919" ackId="#[vars.ackId]" requeue="true"/>
