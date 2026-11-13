@@ -3,18 +3,38 @@
     <flow name="email-utility-api-main">
         <http:listener config-ref="email-utility-api-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            <http:error-response statusCode="#[vars.errorCode default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
+        <ee:transform doc:name="Set Email headers &amp; body" doc:id="4751f37f-3d61-4df3-8f13-550f17f59196">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable resource="dw/vars/emailHeaders.dwl" variableName="emailHeaders" />
+                <ee:set-variable resource="dw/vars/correlationId.dwl" variableName="correlationId" />
+                <ee:set-variable resource="dw/vars/uniqueId.dwl" variableName="uniqueId" />
+                <ee:set-variable resource="dw/vars/transactionType.dwl" variableName="transactionType" />
+                <ee:set-variable resource="dw/vars/flowName.dwl" variableName="flowName" />
+                <ee:set-variable resource="dw/vars/appName.dwl" variableName="appName" />
+                <ee:set-variable variableName="emailBody"><![CDATA[%dw 2.0
+output application/json
+---
+payload.body]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
         <apikit:router config-ref="email-utility-api-config" />
-		<error-handler ref="global-error-handler" />
+        <error-handler ref="global-error-handler" />
     </flow>
     <flow name="post:\email:application\json:email-utility-api-config" doc:id="5147f466-13e1-4856-af3c-380dee69ee8c">
-        <flow-ref doc:name="send-email-subflow" doc:id="0db31376-d856-4953-a8b2-4f668885c8a0" name="send-email-subflow"/>
-		<error-handler ref="global-error-handler" />
+        <flow-ref doc:name="send-email-subflow" doc:id="0db31376-d856-4953-a8b2-4f668885c8a0" name="send-email-subflow" />
+        <error-handler ref="global-error-handler" />
     </flow>
 </mule>

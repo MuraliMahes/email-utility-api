@@ -24,12 +24,17 @@ payload.body]]></ee:set-payload>
 			</ee:variables>
 		</ee:transform>
 		<email:send doc:name="Send Email" doc:id="5399553a-35e9-4b96-b0a1-4a4e5134f4a7" toAddresses="#[vars.emailHeaders.to]" config-ref="Email_SMTP" fromAddress="${email.user}" ccAddresses='#[vars.emailHeaders.cc default null]' subject="#[vars.emailHeaders.subject]">
-			<email:body contentType="text/plain" encoding="UTF-8" />
+			<email:body contentType="text/plain" encoding="UTF-8" >
+				<email:content ><![CDATA[#[vars.emailBody]]]></email:content>
+			</email:body>
 		</email:send>
 		<ee:transform doc:name="Set Response payload" doc:id="4692c3c3-6e44-4d3c-9b8c-bfec6c7ab118" >
 			<ee:message >
 				<ee:set-payload resource="dw/payload/response.dwl" />
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[200]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
 		<logger level="INFO" doc:name="End" doc:id="f2d5249e-b665-43e3-bb2f-5dc8d82a71d7" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name,flow.name,&quot;END&quot;,vars.correlationId, {&quot;subject&quot;: vars.emailHeaders.subject}, Mule::p('email.transactionType'), &quot;Email sent &amp; the flow completed&quot;)]"/>
 	</sub-flow>
