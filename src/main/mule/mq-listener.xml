@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<flow name="mq-listener-mainflow" doc:id="9b15e070-7e28-4046-8224-b3da12ea208c" maxConcurrency="1">
+		<amqp:listener doc:name="Listen to Rabbit MQ" doc:id="846241fd-db7e-4cab-be57-617b50412b15" config-ref="AMQP_Config" queueName="${amqp.queueName}" ackMode="MANUAL" outputMimeType="application/json"/>
+		<flow-ref doc:name="validate-and-send-email-sublfow" doc:id="6dab61c4-79bb-4105-a312-9005528ad092" name="validate-and-send-email-sublfow" />
+		<amqp:ack doc:name="Ack the MQ" doc:id="17ac1d1f-912a-4891-a0fb-53c1973cfc80" ackId="#[vars.ackId]"/>
+		<error-handler ref="global-error-handler" />
+	</flow>
+</mule>

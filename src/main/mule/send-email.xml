@@ -1,25 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<sub-flow name="send-email-subflow" doc:id="ba1c0031-14b3-4512-b607-3f41c29d6ccf" >
-		<logger level="INFO" doc:name="Start" doc:id="42d3ca8a-2097-4a0e-adf0-4719820a7f6c" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name, flow.name, &quot;START&quot;, (payload.body.correlationId default correlationId), {&quot;subject&quot;: payload.subject}, Mule::p('email.transactionType'), &quot;Flow started&quot;)]"/>
-		<email:send doc:name="Send Email" doc:id="5399553a-35e9-4b96-b0a1-4a4e5134f4a7" toAddresses="#[vars.emailHeaders.to]" config-ref="Email_SMTP" fromAddress="${email.user}" ccAddresses='#[vars.emailHeaders.cc default null]' subject="#[vars.emailHeaders.subject]">
-			<email:body contentType="text/plain" encoding="UTF-8" >
-				<email:content ><![CDATA[#[vars.emailBody]]]></email:content>
-			</email:body>
-		</email:send>
-		<ee:transform doc:name="Set Response payload" doc:id="4692c3c3-6e44-4d3c-9b8c-bfec6c7ab118" >
-			<ee:message >
-				<ee:set-payload resource="dw/payload/response.dwl" />
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="httpStatus" ><![CDATA[200]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<logger level="INFO" doc:name="End" doc:id="f2d5249e-b665-43e3-bb2f-5dc8d82a71d7" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name,flow.name,&quot;END&quot;,vars.correlationId, {&quot;subject&quot;: vars.emailHeaders.subject}, Mule::p('email.transactionType'), &quot;Email sent &amp; the flow completed&quot;)]"/>
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd">
+	<sub-flow name="validate-and-send-email-sublfow" doc:id="9355aab8-14e4-4725-a8f8-d408d074ed57" >
+		<try doc:name="Try" doc:id="86fcf318-a40c-4bb8-a5da-43d0083201a3" >
+			<logger level="INFO" doc:name="Start" doc:id="25aca262-c8bc-4951-b1f5-a5c30f773b5d" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name, flow.name, &quot;START&quot;, (payload.body.correlationId default correlationId), {&quot;subject&quot;: payload.subject}, Mule::p('email.transactionType'), &quot;Flow started&quot;)]" />
+			<ee:transform doc:name="Set Email headers &amp; body" doc:id="c6e4ad1b-debb-49af-9f94-b6950f23b664" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable resource="dw/vars/emailHeaders.dwl" variableName="emailHeaders" />
+					<ee:set-variable resource="dw/vars/correlationId.dwl" variableName="correlationId" />
+					<ee:set-variable resource="dw/vars/uniqueId.dwl" variableName="uniqueId" />
+					<ee:set-variable resource="dw/vars/transactionType.dwl" variableName="transactionType" />
+					<ee:set-variable resource="dw/vars/flowName.dwl" variableName="flowName" />
+					<ee:set-variable resource="dw/vars/appName.dwl" variableName="appName" />
+					<ee:set-variable variableName="emailBody" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.body]]></ee:set-variable>
+					<ee:set-variable variableName="ackId" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.ackId]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<validation:is-not-blank-string doc:name="Subject - Is not blank string" doc:id="f851ccbc-4e44-4cf7-93f0-1c00128e5f7e" config-ref="Validation_Config" value="#[vars.emailHeaders.subject]" message="'subject' field is missing/invalid in the payload." />
+			<validation:is-email doc:name="To - Is email" doc:id="393d85b8-2043-495e-93db-83af964f00d0" config-ref="Validation_Config" email='#[vars.emailHeaders.to joinBy ","]' message="'to' field is missing/invalid in the input payload." />
+			<email:send doc:name="Send Email" doc:id="52a477cd-0064-4a54-9c2f-c2909ce33d39" config-ref="Email_SMTP" fromAddress="${email.user}" subject="#[vars.emailHeaders.subject]" toAddresses="#[vars.emailHeaders.to]" ccAddresses="#[vars.emailHeaders.cc default null]" >
+				<email:body contentType="text/plain" encoding="UTF-8" >
+					<email:content ><![CDATA[#[vars.emailBody]]]></email:content>
+				</email:body>
+			</email:send>
+			<logger level="INFO" doc:name="End" doc:id="4f58686f-47a2-4b38-827c-07701c821cac" message="#[output application/json&#10;import * from logging&#10;---&#10;log(app.name,flow.name,&quot;END&quot;,vars.correlationId, {&quot;subject&quot;: vars.emailHeaders.subject}, Mule::p('email.transactionType'), &quot;Email sent &amp; the flow completed&quot;)]" />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="974866a1-fd8d-4053-9c1f-b7e7fbed0cbe" type="VALIDATION:BLANK_STRING, VALIDATION:INVALID_EMAIL" >
+				</on-error-propagate>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4f27eb92-d368-46f8-9885-91071ee3913e" >
+					<amqp:reject doc:name="Reject the message" doc:id="de621f10-3924-4b4f-ac89-cf0ebf5f9919" ackId="#[vars.ackId]" requeue="true"/>
+				</on-error-propagate>
+			</error-handler>
+		</try>
 	</sub-flow>
 </mule>

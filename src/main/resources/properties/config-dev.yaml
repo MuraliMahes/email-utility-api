@@ -12,19 +12,12 @@ email:
     attempts: "2"
   
   
-# API Autodiscovery
-api:
-  id: "21290686"
-  name: "email-utility-api"
+# AMQP Configuration
+
+amqp:
+  host: "localhost"
+  port: "5672"
+  queueName: "email.utility.queue"
+  error.queueName: "email.utility.error.queue"
   
-    
-# HTTP Configuration
-https:
-  host: "0.0.0.0"
-  port: "8081"
-  readTimeout: "30000"
-  connectionIdleTimeout: "40000"
-  reconnection:
-    frequency: "5000"
-    attempts: "2"
   

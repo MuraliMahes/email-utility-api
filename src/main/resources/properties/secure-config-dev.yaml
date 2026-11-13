@@ -2,3 +2,9 @@
 
 email:
   password: "ncrj lkdw xbxr uobu"
+  
+# AMQP Config
+
+amqp:
+  user: "guest"
+  pass: "guest"
